@@ -12,8 +12,13 @@ let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
 let s:save_cpo = &cpo
 set cpo&vim
 
+" settings
+" compiler
+let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" ). " "
+
+
 function! s:compile_file()
-	return system( "g++ -Wall " . expand("%") . " -o " . expand("%:r") )
+	return system( s:gpp_compile_compiler . "-Wall " . expand("%") . " -o " . expand("%:r") )
 endfunction
 
 function! s:print_data()
