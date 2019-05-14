@@ -20,8 +20,17 @@ if !exists(":GppCompileShort")
 endif
 
 if !exists(":GppCompileTest")
-    command GppCompileTest :call gpp_compile#test()
+    command GppCompileTest :call gpp_compile#test(0)
 endif
+
+if !exists(":GppCompileTestShort")
+    command GppCompileTestShort :call gpp_compile#test(1)
+endif
+
+if !exists(":GppCompileTestVeryShort")
+    command GppCompileTestVeryShort :call gpp_compile#test(2)
+endif
+
 
 augroup gpp_compile
 	autocmd!

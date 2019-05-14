@@ -84,26 +84,39 @@ function! s:get_test_data()
 	endfor
 endfunction
 
-function! gpp_compile#test()
+function! gpp_compile#test(print_type)
 	let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
 	if len(l:test_file_list) == 0
 		echo "make file"
 		call s:get_test_data()	
-			let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+		let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+		if len(l:test_file_list) == 0
+			echo "failed to make sample testfiles."
+		endif
 	else
 		" echo l:test_file_list
 	endif 
+
 	let l:ac_num = 0
 	for l:input_file in l:test_file_list
 		let l:diff_str = system(expand("%:p:r") . ".out < " ."/".join(split(expand("%:r"),"/")[:-2],"/") . l:input_file . " | diff -u --strip-trailing-cr - " .substitute(l:input_file,"in","out","g"))
 		if l:diff_str != ""
-			echo l:diff_str
-			echo system("cat ". l:input_file)
+			echo l:diff_str | echo system("cat ". l:input_file)
 		else
 			let l:ac_num += 1
 		endif
 	endfor
-	echo l:ac_num . "/" .len(l:test_file_list) . " is accepted!"
+	if a:print_type == 0
+		echo l:ac_num . "/" .len(l:test_file_list) . " is accepted!"
+	elseif a:print_type == 1
+		echo l:ac_num . "/" .len(l:test_file_list)
+	else
+		if l:ac_num == len(l:test_file_list)
+			echo "OK!"
+		else
+			echo "NG!"
+		endif
+	endif
 endfunction
 
 " 退避していたユーザ設定を戻す
