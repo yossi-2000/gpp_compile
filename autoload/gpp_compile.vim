@@ -71,7 +71,7 @@ endfunction
 
 function! s:gpp_compile_auto()
 	if s:gpp_compile_auto_type
-		if silent s:is_target_dir()
+		if s:is_target_dir()
 			call s:print_data(0)
 		endif
 	endif
