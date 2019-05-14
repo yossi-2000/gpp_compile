@@ -115,9 +115,9 @@ function! gpp_compile#test(print_type)
 		echo l:ac_num . "/" .len(l:test_file_list)
 	else
 		if l:ac_num == len(l:test_file_list)
-			echo "OK!"
+			echo 1
 		else
-			echo "NG!"
+			echo 0
 		endif
 	endif
 endfunction
