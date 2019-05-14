@@ -13,6 +13,9 @@
 let g:gpp_compile_compiler="clang++"
 などとするとコンパイラをclang++に変えられます
 - 標準は g++
+let g:gpp_compile_compiler_option = "-Wall"
+などとするとコンパイラのオプションを選べます.
+- 標準は"-Wall"
 
 ### 自動コンパイル
 let g:gpp_compile_auto_type = 0

@@ -15,6 +15,7 @@ set cpo&vim
 " settings
 " compiler
 let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
+let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler", "-Wall" )
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
 
@@ -28,7 +29,7 @@ call s:check(s:gpp_compile_compiler)
 call s:check("diff")
 
 function! s:compile_file()
-	return system( s:gpp_compile_compiler . " -Wall " . expand("%:p") . " -o " . expand("%:p:r").".out" )
+	return system( s:gpp_compile_compiler . " " .s:gpp_compile_compiler_option . " " . expand("%:p") . " -o " . expand("%:p:r").".out" )
 endfunction
 
 function! s:print_data(print_type)
