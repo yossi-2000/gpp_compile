@@ -34,7 +34,7 @@ endif
 
 augroup gpp_compile
 	autocmd!
-	autocmd BufWritePost,FileWritePost,FileAppendPost *.cpp call gpp_compile#gpp_compile_auto()
+	autocmd BufWritePost,FileWritePost,FileAppendPost *.cpp call gpp_compile#gpp_compile_reset()
 augroup END
 
 " 退避していたユーザ設定を戻す

@@ -19,7 +19,10 @@ let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler", "-Wall" )
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
 " work dir
-let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',"kyopro")
+let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
+
+let s:gpp_compile_is_compiled = 1
+let s:gpp_compile_is_tested = 1
 
 function! s:check(check_command)
 	if !executable(a:check_command)
@@ -31,11 +34,15 @@ call s:check(s:gpp_compile_compiler)
 call s:check("diff")
 
 function! s:compile_file()
+	let s:gpp_compile_is_compiled = 0
 	return system( s:gpp_compile_compiler . " " .s:gpp_compile_compiler_option . " " . expand("%:p") . " -o " . expand("%:p:r").".out" )
 endfunction
 
 function! s:print_data(print_type)
-	let s:cout_string = s:compile_file()
+	if s:gpp_compile_is_compiled 
+		let s:cout_string = s:compile_file()
+	endif
+
 	if s:cout_string != ""
 		if a:print_type
 			highlight MyMessage ctermfg=red | echohl MyMessage | echo "NG!" | echohl NONE
@@ -54,15 +61,25 @@ function! gpp_compile#compile(print_type)
 endfunction
 
 function! s:is_target_dir()
-	return expand("%:p") =~ $HOME . "/" . s:gpp_compile_work_dir 
+	echo ( expand("%:p") =~ s:gpp_compile_work_dir )
+	return expand("%:p") =~ s:gpp_compile_work_dir 
 endfunction
 
-function! gpp_compile#gpp_compile_auto()
+function! gpp_compile#is_target_dir()
+	return s:is_target_dir()
+endfunction
+
+function! s:gpp_compile_auto()
 	if s:gpp_compile_auto_type
-		if s:is_target_dir()
+		if silent s:is_target_dir()
 			call s:print_data(0)
 		endif
 	endif
+endfunction
+
+function! gpp_compile#gpp_compile_reset()
+	let s:gpp_compile_is_compiled = 1
+	call s:gpp_compile_auto()
 endfunction
 
 function! s:get_test_data()
@@ -88,6 +105,10 @@ function! s:get_test_data()
 endfunction
 
 function! gpp_compile#test(print_type)
+	if s:gpp_compile_is_compiled
+		call s:print_data(0)
+	endif
+
 	let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
 	if len(l:test_file_list) == 0
 		echo "make file"
@@ -116,8 +137,10 @@ function! gpp_compile#test(print_type)
 	else
 		if l:ac_num == len(l:test_file_list)
 			echo 1
+			" echo 'OK!'
 		else
 			echo 0
+			" echo 'NG!'
 		endif
 	endif
 endfunction
