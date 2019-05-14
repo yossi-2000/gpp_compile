@@ -60,18 +60,20 @@ function! gpp_compile#compile(print_type)
 	return s:print_data(a:print_type)
 endfunction
 
-function! s:is_target_dir()
-	echo ( expand("%:p") =~ s:gpp_compile_work_dir )
+function! s:is_target_dir(print_type)
+	if a:print_type
+		echo ( expand("%:p") =~ s:gpp_compile_work_dir )
+	endif
 	return expand("%:p") =~ s:gpp_compile_work_dir 
 endfunction
 
 function! gpp_compile#is_target_dir()
-	return s:is_target_dir()
+	return s:is_target_dir(1)
 endfunction
 
 function! s:gpp_compile_auto()
 	if s:gpp_compile_auto_type
-		if s:is_target_dir()
+		if s:is_target_dir(0)
 			call s:print_data(0)
 		endif
 	endif
