@@ -19,6 +19,10 @@ if !exists(":GppCompileShort")
     command GppCompileShort :call gpp_compile#compile(1)
 endif
 
+if !exists(":GppCompileTest")
+    command GppCompileTest :call gpp_compile#test()
+endif
+
 augroup gpp_compile
 	autocmd!
 	autocmd BufWritePost,FileWritePost,FileAppendPost *.cpp call gpp_compile#gpp_compile_auto()

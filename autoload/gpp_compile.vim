@@ -18,34 +18,30 @@ let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
 
-if !executable(s:gpp_compile_compiler)
-	echo s:gpp_compile_compiler . " is not defined!"
-	finish
-endif
+function! s:check(check_command)
+	if !executable(a:check_command)
+		echohl WaringMsg | echo a:check_command . " is not defined!" | echohl None | finish
+	endif
+endfunction
+
+call s:check(s:gpp_compile_compiler)
+call s:check("diff")
 
 function! s:compile_file()
-	return system( s:gpp_compile_compiler . " -Wall " . expand("%") . " -o " . expand("%:r").".out" )
+	return system( s:gpp_compile_compiler . " -Wall " . expand("%:p") . " -o " . expand("%:p:r").".out" )
 endfunction
 
 function! s:print_data(print_type)
 	let s:cout_string = s:compile_file()
 	if s:cout_string != ""
 		if a:print_type
-			highlight MyMessage ctermfg=red
-			echohl MyMessage  
-			echo "NG!"
-			echohl NONE
+			highlight MyMessage ctermfg=red | echohl MyMessage | echo "NG!" | echohl NONE
 		else
-			echo s:cout_string
-			highlight StatusLine   term=NONE cterm=NONE ctermbg=red
+			echo s:cout_string | highlight StatusLine   term=NONE cterm=NONE ctermbg=red
 		endif
 	else
 		highlight StatusLine   term=NONE cterm=NONE ctermbg=blue
-
-		highlight MyMessage ctermfg=green 
-		echohl MyMessage 
-		echo 'OK!' 
-		echohl NONE
+		highlight MyMessage ctermfg=green  | echohl MyMessage | echo 'OK!' | echohl NONE
 	endif
 	return 
 endfunction
@@ -64,6 +60,50 @@ function! gpp_compile#gpp_compile_auto()
 			call s:print_data(0)
 		endif
 	endif
+endfunction
+
+function! s:get_test_data()
+	let l:atcoder_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks/".split(expand("%:p"),"/")[-2] . "_" .tolower(split(expand("%:p:r"),"/")[-1])
+	echo "downloading sample data from " . l:atcoder_url . "..."
+	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
+	let l:test_data_list = split(l:atcoder_site_data,"Sample Input")[1:]
+
+	let l:test_data_num = 1
+	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+	if !isdirectory(l:test_dir) 
+			call mkdir(l:test_dir,"p")
+	endif
+	for l:test_data in l:test_data_list
+		let l:tmp_data = split(l:test_data,"Sample Output ")
+		let l:tmp_input = split(split(split(l:tmp_data[0],"<pre>")[1],"<pre>")[0],"\n")
+		let l:tmp_output = split(split(split(l:tmp_data[1],"<pre>")[1],"<pre>")[0],"\n")
+
+		call writefile(l:tmp_input, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_input".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
+		call writefile(l:tmp_output, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_output".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
+		let l:test_data_num += 1
+	endfor
+endfunction
+
+function! gpp_compile#test()
+	let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+	if len(l:test_file_list) == 0
+		echo "make file"
+		call s:get_test_data()	
+			let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+	else
+		" echo l:test_file_list
+	endif 
+	let l:ac_num = 0
+	for l:input_file in l:test_file_list
+		let l:diff_str = system(expand("%:p:r") . ".out < " ."/".join(split(expand("%:r"),"/")[:-2],"/") . l:input_file . " | diff -u --strip-trailing-cr - " .substitute(l:input_file,"in","out","g"))
+		if l:diff_str != ""
+			echo l:diff_str
+			echo system("cat ". l:input_file)
+		else
+			let l:ac_num += 1
+		endif
+	endfor
+	echo l:ac_num . "/" .len(l:test_file_list) . " is accepted!"
 endfunction
 
 " 退避していたユーザ設定を戻す

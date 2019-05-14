@@ -2,6 +2,11 @@
 
 ## つかいかた
 :GppCompile とvimの下の欄に打つと自動でコンパイルしてくれます.
+:GppCompileShort とすると短く結果を表示します。
+:GppCompileTest とするとTestがされます.なおデータがないときはリモートからdownloadします。
+:GppCompileTestShort とするとTestがされます.上のコマンドとの違いはいくつが通ったかが表示されるだけになってます.
+:GppCompileTestVeryShort とするとTestがされます.上のコマンドとの違いはすべて通ったかそうでないかが表示されます。
+
 
 ## 設定
 ### コンパイラの種類
