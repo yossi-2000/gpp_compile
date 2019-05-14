@@ -74,7 +74,7 @@ endfunction
 function! s:gpp_compile_auto()
 	if s:gpp_compile_auto_type
 		if s:is_target_dir(0)
-			call s:print_data(0)
+			silent call s:print_data(0)
 		endif
 	endif
 endfunction
@@ -97,8 +97,8 @@ function! s:get_test_data()
 	endif
 	for l:test_data in l:test_data_list
 		let l:tmp_data = split(l:test_data,"Sample Output ")
-		let l:tmp_input = split(split(split(l:tmp_data[0],"<pre>")[1],"<pre>")[0],"\n")
-		let l:tmp_output = split(split(split(l:tmp_data[1],"<pre>")[1],"<pre>")[0],"\n")
+		let l:tmp_input = split(split(split(l:tmp_data[0],"<pre>")[1],"</pre>")[0],"\n")
+		let l:tmp_output = split(split(split(l:tmp_data[1],"<pre>")[1],"</pre>")[0],"\n")
 
 		call writefile(l:tmp_input, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_input".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
 		call writefile(l:tmp_output, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_output".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
