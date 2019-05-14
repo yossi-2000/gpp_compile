@@ -18,6 +18,8 @@ let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
 let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler", "-Wall" )
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
+" work dir
+let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',"kyopro")
 
 function! s:check(check_command)
 	if !executable(a:check_command)
@@ -52,7 +54,7 @@ function! gpp_compile#compile(print_type)
 endfunction
 
 function! s:is_target_dir()
-	return expand("%:p") =~ $HOME . "/program/project/atcoder"
+	return expand("%:p") =~ $HOME . "/" . s:gpp_compile_work_dir 
 endfunction
 
 function! gpp_compile#gpp_compile_auto()

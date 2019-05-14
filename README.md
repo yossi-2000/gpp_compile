@@ -9,6 +9,12 @@
 
 
 ## 設定
+### ツールが動くディレクトリの指定
+let g:gpp_compile_work_dir = "kyopro"
+などとするとツールが動くディレクトリを決められます。
+こうすると~/kyopro/****のファイルで動きます
+- 標準はkyopro
+
 ### コンパイラの種類
 let g:gpp_compile_compiler="clang++"
 などとするとコンパイラをclang++に変えられます
