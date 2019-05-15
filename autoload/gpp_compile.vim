@@ -5,7 +5,7 @@ scriptencoding utf-8
 if exists('g:loaded_gpp_compile_autoload')
     finish
 endif
-let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
+" let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
 
 
 " ユーザー設定を一時退避
@@ -20,11 +20,17 @@ let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler_option", "" )
 
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
+" auto test
+let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
+
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
 let s:gpp_compile_is_compiled = 4
-let s:gpp_compile_is_tested = 4
+let s:test_num = 4
+let s:test_out_puts = []
+let s:test_set_num = 0
+let s:test_ac_num = 0
 
 function! s:check(check_command)
 	if !executable(a:check_command)
@@ -105,14 +111,6 @@ function! s:print_data_compile(print_type)
 	endif
 endfunction
 
-function! s:gpp_compile_auto()
-	if s:gpp_compile_auto_type == 1
-		if s:is_target_dir(0) == 1
-			silent call s:do_compile()
-		endif
-	endif
-endfunction
-
 function! gpp_compile#compile(print_type)
 	call s:do_compile()
 	return s:print_data_compile(a:print_type)
@@ -120,7 +118,11 @@ endfunction
 
 function! gpp_compile#gpp_compile_reset()
 	let s:gpp_compile_is_compiled = 4
-	call s:gpp_compile_auto()
+	if s:gpp_compile_auto_type == 1
+		if s:is_target_dir(0) == 1
+			silent call s:do_compile()
+		endif
+	endif
 endfunction
 
 function! gpp_compile#check_compile_num()
@@ -131,7 +133,9 @@ function! gpp_compile#check_compile()
 	call s:print_data_compile(2)
 endfunction
 
+
 function! s:get_test_data()
+	echo "making files"
 	let l:atcoder_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks/".split(expand("%:p"),"/")[-2] . "_" .tolower(split(expand("%:p:r"),"/")[-1])
 	echo "downloading sample data from " . l:atcoder_url . "..."
 	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
@@ -154,16 +158,21 @@ function! s:get_test_data()
 	endfor
 endfunction
 
-function! gpp_compile#test(print_type)
-	if s:gpp_compile_is_compiled
-		call s:print_data(0)
-	endif
-
-	let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+function! s:check_test_files()
+	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
+	let l:test_file_list = split(system("ls ".l:file_dir."test/sample_input".split(expand("%:p:r"),"/")[-1]."_* 2>/dev/null"),"\n")
 	if len(l:test_file_list) == 0
-		echo "make file"
+		s:test_num = 4 " not downloaded
+	endif
+	return l:test_file_list
+endfunction
+
+function! s:test_file()
+	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
+	let l:test_file_list = s:check_test_files()
+	if len(l:test_file_list) == 0
 		call s:get_test_data()	
-		let l:test_file_list = split(system("ls " . "/".join(split(expand("%:p"),"/")[:-2],"/") ."/test/sample_input".split(expand("%:p:r"),"/")[-1] . "_* 2>/dev/null") ,"\n")
+		let l:test_file_list = s:check_test_files()
 		if len(l:test_file_list) == 0
 			echo "failed to make sample testfiles."
 		endif
@@ -172,27 +181,104 @@ function! gpp_compile#test(print_type)
 	endif 
 
 	let l:ac_num = 0
+	let s:test_out_puts = []
 	for l:input_file in l:test_file_list
-		let l:diff_str = system(expand("%:p:r") . ".out < " ."/".join(split(expand("%:r"),"/")[:-2],"/") . l:input_file . " | diff -u --strip-trailing-cr - " .substitute(l:input_file,"in","out","g"))
+		let l:diff_str = system(expand("%:p:r").".out < ".l:input_file." | diff -u --strip-trailing-cr - ".substitute(l:input_file,"in","out","g"))
 		if l:diff_str != ""
-			echo l:diff_str | echo system("cat ". l:input_file)
+			call add(s:test_out_puts,l:diff_str)
 		else
+			" echo l:ac_num
 			let l:ac_num += 1
 		endif
 	endfor
-	if a:print_type == 0
-		echo l:ac_num . "/" .len(l:test_file_list) . " is accepted!"
-	elseif a:print_type == 1
-		echo l:ac_num . "/" .len(l:test_file_list)
-	else
-		if l:ac_num == len(l:test_file_list)
-			echo 1
-			" echo 'OK!'
-		else
-			echo 0
-			" echo 'NG!'
+	let s:test_ac_num = l:ac_num
+	let s:test_set_num = len(l:test_file_list)
+	if s:test_ac_num == s:test_set_num 
+		let s:test_num = 2 " OK!
+	else 
+		let s:test_num = 1 " NG!
+	endif
+endfunction
+
+function! s:do_test()
+	if s:test_num == 4
+		call s:test_file()
+	elseif s:test_num == 3
+		call s:test_file()
+	endif
+	return s:test_num
+endfunction
+
+function! s:print_data_test(print_type)
+	if a:print_type == 1 " just num
+		echo s:test_num
+
+	elseif a:print_type == 2 " two char
+		if s:test_num == 1 " NG
+			echo "NG"
+		elseif s:test_num == 2 " OK
+			echo "OK"
+		elseif s:test_num == 3 " ND
+			echo "WA"  
+		elseif s:test_num == 4 " NY
+			echo "NY"
+		endif
+
+	elseif a:print_type == 3 " short messsage
+		if s:test_num == 1 " NG
+			echo s:test_ac_num."/".s:test_set_num
+		elseif s:test_num == 2 " OK
+			echo s:test_ac_num."/".s:test_set_num
+		elseif s:test_num == 3 " ND
+			echo "not downloaded
+		elseif s:test_num == 4 " NY
+			echo "not yet"
+		endif
+
+	elseif a:print_type == 4 " full
+		if s:test_num == 1 " NG
+			for l:test_output in s:test_out_puts
+				echo l:test_output
+			endfor 
+		elseif s:test_num == 2 " OK
+			echo s:test_ac_num."/".s:test_set_num." OK!"
+		elseif s:test_num == 3 " ND
+			echo "not downloaded
+		elseif s:test_num == 4 " NY
+			echo "not yet"
+		endif
+	else 
+		echo "print_data is " . a:print_type . "@s:print_data_test and it`s invalid." 
+	endif
+endfunction
+
+function! gpp_compile#check_test_num()
+	call s:print_data_test(1)
+endfunction
+
+function! gpp_compile#check_test()
+	call s:print_data_test(3)
+endfunction
+
+function! gpp_compile#test(print_type)
+	call s:do_test()
+	return s:print_data_test(a:print_type)
+endfunction
+
+function! gpp_compile#gpp_test_reset()
+	if s:test_num != 3
+		let s:test_num = 4
+	endif
+	if s:gpp_test_auto_type == 1
+		if s:is_target_dir(0) == 1
+			call s:do_test()
 		endif
 	endif
+endfunction
+
+function! gpp_compile#auto()
+	call gpp_compile#gpp_compile_reset()
+	call gpp_compile#gpp_test_reset()
 endfunction
 
 " 退避していたユーザ設定を戻す

@@ -20,7 +20,7 @@ WA
 NY
 で表示される。
 
-gpp_compile#check_test_num()でtestの状況が
+gpp_compile#check_test_num()でtestの状況が(s:test_num )
 1: NG
 2: OK
 3: ND ( not downloaded )

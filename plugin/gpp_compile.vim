@@ -20,21 +20,17 @@ if !exists(":GppCompileShort")
 endif
 
 if !exists(":GppCompileTest")
-    command GppCompileTest :call gpp_compile#test(0)
+    command GppCompileTest :call gpp_compile#test(4)
 endif
 
 if !exists(":GppCompileTestShort")
-    command GppCompileTestShort :call gpp_compile#test(1)
-endif
-
-if !exists(":GppCompileTestVeryShort")
-    command GppCompileTestVeryShort :call gpp_compile#test(2)
+    command GppCompileTestShort :call gpp_compile#test(3)
 endif
 
 
 augroup gpp_compile
 	autocmd!
-	autocmd BufWritePost,FileWritePost,FileAppendPost *.cpp call gpp_compile#gpp_compile_reset()
+	autocmd BufWritePost,FileWritePost,FileAppendPost *.cpp call gpp_compile#auto()
 augroup END
 
 " 退避していたユーザ設定を戻す
