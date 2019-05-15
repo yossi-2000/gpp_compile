@@ -7,6 +7,45 @@
 :GppCompileTestShort とするとTestがされます.上のコマンドとの違いはいくつが通ったかが表示されるだけになってます.
 :GppCompileTestVeryShort とするとTestがされます.上のコマンドとの違いはすべて通ったかそうでないかが表示されます。
 
+gpp_compile#check_compile_num()でcompileの状態が
+1: NG
+2: OK
+3: WA
+4: NY(not yet!)
+
+gpp_compile#check_compile()でcompileの状態が
+NG
+OK
+WA
+NY
+で表示される。
+
+gpp_compile#check_test_num()でtestの状況が
+1: NG
+2: OK
+3: ND ( not downloaded )
+4: NY(not yet!)
+- gpp_compile#check_test()でtestが
+{ac}/{wa} or  null
+の形で数字が表示される。
+
+printtype
+1 just num
+2 two char
+3 short message(just in test)
+4 full
+
+s:gpp_compile_file()
+compile target file
+return error message
+
+s:gpp_compile_file_no_warn()
+compile target file
+return error message (without warn)
+
+s:gpp_test()
+test binary file
+return error message
 
 ## 設定
 ### ツールが動くディレクトリの指定

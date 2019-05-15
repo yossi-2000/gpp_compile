@@ -15,14 +15,16 @@ set cpo&vim
 " settings
 " compiler
 let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
-let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler", "-Wall" )
+let s:gpp_compile_compiler_warning_option = get(g:, "gpp_compile_compiler_warning_option", "-Wall" )
+let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler_option", "" )
+
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
-let s:gpp_compile_is_compiled = 1
-let s:gpp_compile_is_tested = 1
+let s:gpp_compile_is_compiled = 4
+let s:gpp_compile_is_tested = 4
 
 function! s:check(check_command)
 	if !executable(a:check_command)
@@ -33,35 +35,8 @@ endfunction
 call s:check(s:gpp_compile_compiler)
 call s:check("diff")
 
-function! s:compile_file()
-	let s:gpp_compile_is_compiled = 0
-	return system( s:gpp_compile_compiler . " " .s:gpp_compile_compiler_option . " " . expand("%:p") . " -o " . expand("%:p:r").".out" )
-endfunction
-
-function! s:print_data(print_type)
-	if s:gpp_compile_is_compiled 
-		let s:cout_string = s:compile_file()
-	endif
-
-	if s:cout_string != ""
-		if a:print_type
-			highlight MyMessage ctermfg=red | echohl MyMessage | echo "NG!" | echohl NONE
-		else
-			echo s:cout_string | highlight StatusLine   term=NONE cterm=NONE ctermbg=red
-		endif
-	else
-		highlight StatusLine   term=NONE cterm=NONE ctermbg=blue
-		highlight MyMessage ctermfg=green  | echohl MyMessage | echo 'OK!' | echohl NONE
-	endif
-	return 
-endfunction
-
-function! gpp_compile#compile(print_type)
-	return s:print_data(a:print_type)
-endfunction
-
 function! s:is_target_dir(print_type)
-	if a:print_type
+	if a:print_type == 1
 		echo ( expand("%:p") =~ s:gpp_compile_work_dir )
 	endif
 	return expand("%:p") =~ s:gpp_compile_work_dir 
@@ -71,23 +46,96 @@ function! gpp_compile#is_target_dir()
 	return s:is_target_dir(1)
 endfunction
 
+function! s:compile_file()
+	return system(s:gpp_compile_compiler." ".s:gpp_compile_compiler_option." ".s:gpp_compile_compiler_warning_option." ".expand("%:p")." -o ".expand("%:p:r").".out" )
+endfunction
+
+function! s:compile_file_nowarn()
+	return system( s:gpp_compile_compiler." ".s:gpp_compile_compiler_option." ".expand("%:p")." -o ".expand("%:p:r").".out" )
+endfunction
+
+function! s:do_compile()
+	if s:gpp_compile_is_compiled == 4
+		let s:cout_string = s:compile_file()
+		if s:cout_string == ""
+			let s:gpp_compile_is_compiled = 2
+		else
+			if s:compile_file_nowarn() == ""
+				let s:gpp_compile_is_compiled = 3
+			else
+				let s:gpp_compile_is_compiled = 1
+			endif
+		endif
+		return s:gpp_compile_is_compiled 
+	else
+		return s:gpp_compile_is_compiled
+	endif
+endfunction
+
+function! s:print_data_compile(print_type)
+	if a:print_type == 1 " just num
+		echo s:gpp_compile_is_compiled
+
+	elseif a:print_type == 2 " two char
+		if s:gpp_compile_is_compiled == 1 " NG
+			echo "NG"
+		elseif s:gpp_compile_is_compiled == 2 " OK
+			echo "OK"
+		elseif s:gpp_compile_is_compiled == 3 " WA
+			echo "WA"  
+		elseif s:gpp_compile_is_compiled == 4 " NY
+			echo "NY"
+		endif
+
+	elseif a:print_type == 3 " short messsage
+		echo "invalid"	
+
+	elseif a:print_type == 4 " full
+		if s:gpp_compile_is_compiled == 1 " NG
+			echo s:cout_string
+		elseif s:gpp_compile_is_compiled == 2 " OK
+			echo "OK!"
+		elseif s:gpp_compile_is_compiled == 3 " WA
+			echo s:cout_string
+		elseif s:gpp_compile_is_compiled == 4 "NY
+			echo "Not Yet!"
+		endif
+	else 
+		echo "print_data is " . a:print_data . "@s:print_data_compile and it`s invalid." 
+	endif
+endfunction
+
 function! s:gpp_compile_auto()
-	if s:gpp_compile_auto_type
-		if s:is_target_dir(0)
-			silent call s:print_data(0)
+	if s:gpp_compile_auto_type == 1
+		if s:is_target_dir(0) == 1
+			silent call s:do_compile()
 		endif
 	endif
 endfunction
 
+function! gpp_compile#compile(print_type)
+	call s:do_compile()
+	return s:print_data_compile(a:print_type)
+endfunction
+
 function! gpp_compile#gpp_compile_reset()
-	let s:gpp_compile_is_compiled = 1
+	let s:gpp_compile_is_compiled = 4
 	call s:gpp_compile_auto()
+endfunction
+
+function! gpp_compile#check_compile_num()
+	call s:print_data_compile(1)
+endfunction
+
+function! gpp_compile#check_compile()
+	call s:print_data_compile(2)
 endfunction
 
 function! s:get_test_data()
 	let l:atcoder_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks/".split(expand("%:p"),"/")[-2] . "_" .tolower(split(expand("%:p:r"),"/")[-1])
 	echo "downloading sample data from " . l:atcoder_url . "..."
 	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
+	echo "hoge"
 	let l:test_data_list = split(l:atcoder_site_data,"Sample Input")[1:]
 
 	let l:test_data_num = 1

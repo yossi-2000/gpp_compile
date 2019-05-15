@@ -12,11 +12,11 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 if !exists(":GppCompile")
-    command GppCompile :call gpp_compile#compile(0)
+    command GppCompile :call gpp_compile#compile(4)
 endif
 
 if !exists(":GppCompileShort")
-    command GppCompileShort :call gpp_compile#compile(1)
+    command GppCompileShort :call gpp_compile#compile(2)
 endif
 
 if !exists(":GppCompileTest")
