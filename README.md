@@ -7,6 +7,8 @@
 :GppCompileTestShort とするとTestがされます.上のコマンドとの違いはいくつが通ったかが表示されるだけになってます.
 :GppCompileTestVeryShort とするとTestがされます.上のコマンドとの違いはすべて通ったかそうでないかが表示されます。
 
+:GppCompileCopy で開いてるファイルのデータをクリップボードにコピーする
+
 gpp_compile#check_compile_num()でcompileの状態が
 1: NG
 2: OK

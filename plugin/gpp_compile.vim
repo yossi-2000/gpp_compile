@@ -27,6 +27,9 @@ if !exists(":GppCompileTestShort")
     command GppCompileTestShort :call gpp_compile#test(3)
 endif
 
+if !exists(":GppCompileCopy")
+    command GppCompileCopy :call gpp_compile#copy()
+endif
 
 augroup gpp_compile
 	autocmd!

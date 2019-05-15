@@ -41,6 +41,29 @@ endfunction
 call s:check(s:gpp_compile_compiler)
 call s:check("diff")
 
+function! s:copy()
+	call s:check("uname")
+	let l:os = system("uname")
+	" echo l:os
+	if l:os == ""
+		echo "hoge"
+	endif
+	if l:os =~ "Darwin" 
+		" echo "mac"
+		call s:check("pbcopy")
+		call system("cat ".expand("%:p")." | pbcopy ")
+	elseif l:os =~ "Linux"
+		" echo "Linux"
+		call s:check("xsel")
+		call system("cat ".expand("%:p")." | xsel --clipboard --input")
+	endif
+endfunction
+
+function! gpp_compile#copy()
+	call s:copy()
+endfunction
+
+
 function! s:is_target_dir(print_type)
 	if a:print_type == 1
 		echo ( expand("%:p") =~ s:gpp_compile_work_dir )
