@@ -53,7 +53,7 @@ return error message
 ### ツールが動くディレクトリの指定
 let g:gpp_compile_work_dir = $HOME ."/kyopro"
 などとするとツールが動くディレクトリを決められます。
-こうすると~/kyopro/****のファイルで動きます
+こうすると~/kyopro/*のファイルで動きます
 - 標準はkyopro
 :call gpp_compile#is_target_dir()
 で動くディレクトリーかわかります.
@@ -62,11 +62,19 @@ let g:gpp_compile_work_dir = $HOME ."/kyopro"
 let g:gpp_compile_compiler="clang++"
 などとするとコンパイラをclang++に変えられます
 - 標準は g++
-let g:gpp_compile_compiler_option = "-Wall"
-などとするとコンパイラのオプションを選べます.
+let g:gpp_compile_compiler_warning_option = "-Wall"
+などとするとコンパイラのWaringのオプションを選べます.
 - 標準は"-Wall"
+let g:gpp_compile_compiler_option = "-std=c++1z"
+などとするとコンパイラの(Waringでない)オプションを選べます.
+- 標準は""
 
 ### 自動コンパイル
 let g:gpp_compile_auto_type = 0
 とすると自動コンパイルしなくなる.
-なおデフォルトは1で自動コンパイルする。
+- なおデフォルトは1で自動コンパイルする。
+
+### 自動テスト
+let g:gpp_test_auto_type = 0
+とすると自動テストしなくなる.
+- なおデフォルトは1で自動コンパイルする。
