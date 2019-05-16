@@ -156,10 +156,35 @@ function! gpp_compile#check_compile()
 	call s:print_data_compile(2)
 endfunction
 
+function! s:get_sample_data_page()
+	let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
+	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
+	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
+	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
+	for l:hoge in l:atcoder_task_site_data_list
+		let l:hoge = split(l:hoge,"><a href='")[1]
+		" echo "hoge:\t".l:hoge
+		" echo "file_name:\t".toupper(split(expand("%:p:r"),"/")[-1])
+		" echo "match_num:\t".stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) )
+		if stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) ) == -1
+			echo "not match"
+			continue
+		endif
+		echo "match"
+		let l:hoge = split(l:hoge,'</a>')[0]
+		let l:hoge = split(l:hoge,"'>")[0]
+		let l:ans = "https://atcoder.jp".l:hoge 
+		let l:hoge = l:ans
+		echo l:hoge
+		return l:hoge
+	endfor
+	echo "failed to find url"
+	finish
+endfunction
 
 function! s:get_test_data()
 	echo "making files"
-	let l:atcoder_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks/".split(expand("%:p"),"/")[-2] . "_" .tolower(split(expand("%:p:r"),"/")[-1])
+	let l:atcoder_url = s:get_sample_data_page()
 	echo "downloading sample data from " . l:atcoder_url . "..."
 	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
 	echo "hoge"
@@ -185,7 +210,7 @@ function! s:check_test_files()
 	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
 	let l:test_file_list = split(system("ls ".l:file_dir."test/sample_input".split(expand("%:p:r"),"/")[-1]."_* 2>/dev/null"),"\n")
 	if len(l:test_file_list) == 0
-		s:test_num = 4 " not downloaded
+		let s:test_num = 4 " not downloaded
 	endif
 	return l:test_file_list
 endfunction
