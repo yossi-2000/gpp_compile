@@ -64,15 +64,13 @@ function! gpp_compile#copy()
 endfunction
 
 
-function! s:is_target_dir(print_type)
-	if a:print_type == 1
-		echo ( expand("%:p") =~ s:gpp_compile_work_dir )
-	endif
+function! s:is_target_dir()
+	echo ( expand("%:p") =~ s:gpp_compile_work_dir )
 	return expand("%:p") =~ s:gpp_compile_work_dir 
 endfunction
 
 function! gpp_compile#is_target_dir()
-	return s:is_target_dir(1)
+	silent return s:is_target_dir()
 endfunction
 
 function! s:compile_file()
@@ -147,7 +145,7 @@ endfunction
 function! gpp_compile#gpp_compile_reset()
 	let s:gpp_compile_is_compiled = 4
 	if s:gpp_compile_auto_type == 1
-		if s:is_target_dir(0) == 1
+		silent if s:is_target_dir() == 1
 			silent call s:do_compile()
 		endif
 	endif
@@ -192,7 +190,7 @@ function! s:get_test_data()
 	let l:atcoder_url = s:get_sample_data_page()
 	echo "downloading sample data from " . l:atcoder_url . "..."
 	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
-	echo "hoge"
+	" echo "hoge"
 	let l:test_data_list = split(l:atcoder_site_data,"Sample Input")[1:]
 
 	let l:test_data_num = 1
@@ -254,10 +252,18 @@ function! s:test_file()
 endfunction
 
 function! s:do_test()
-	if s:test_num == 4
-		call s:test_file()
-	elseif s:test_num == 3
-		call s:test_file()
+	if s:gpp_compile_is_compiled == 1 " NG
+		if s:test_num != 3 " Not Downloaded
+			let s:test_num = 1
+			let s:test_ac_num = 0
+		endif
+	else
+
+		if s:test_num == 4
+			call s:test_file()
+		elseif s:test_num == 3
+			call s:test_file()
+		endif
 	endif
 	return s:test_num
 endfunction
@@ -329,10 +335,14 @@ endfunction
 
 function! gpp_compile#gpp_test_reset()
 	if s:test_num != 3
+		" echo "change to 4"
 		let s:test_num = 4
+	else
+		" echo "not change to 4"
 	endif
+
 	if s:gpp_test_auto_type == 1
-		if s:is_target_dir(0) == 1
+		silent if s:is_target_dir() == 1
 			call s:do_test()
 		endif
 	endif
