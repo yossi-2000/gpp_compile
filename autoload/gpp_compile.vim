@@ -104,16 +104,21 @@ endfunction
 function! s:print_data_compile(print_type)
 	if a:print_type == 1 " just num
 		echo s:gpp_compile_is_compiled
+		return s:gpp_compile_is_compiled
 
 	elseif a:print_type == 2 " two char
 		if s:gpp_compile_is_compiled == 1 " NG
 			echo "NG"
+			return "NG"
 		elseif s:gpp_compile_is_compiled == 2 " OK
 			echo "OK"
+			return "OK"
 		elseif s:gpp_compile_is_compiled == 3 " WA
 			echo "WA"  
+			return "WA"
 		elseif s:gpp_compile_is_compiled == 4 " NY
 			echo "NY"
+			return "NY"
 		endif
 
 	elseif a:print_type == 3 " short messsage
@@ -149,11 +154,11 @@ function! gpp_compile#gpp_compile_reset()
 endfunction
 
 function! gpp_compile#check_compile_num()
-	call s:print_data_compile(1)
+	return s:print_data_compile(1)
 endfunction
 
 function! gpp_compile#check_compile()
-	call s:print_data_compile(2)
+	return s:print_data_compile(2)
 endfunction
 
 function! s:get_sample_data_page()
@@ -260,27 +265,36 @@ endfunction
 function! s:print_data_test(print_type)
 	if a:print_type == 1 " just num
 		echo s:test_num
+		return s:test_num
 
 	elseif a:print_type == 2 " two char
 		if s:test_num == 1 " NG
 			echo "NG"
+			return "NG"
 		elseif s:test_num == 2 " OK
 			echo "OK"
+			return "OK"
 		elseif s:test_num == 3 " ND
 			echo "WA"  
+			return "WA"
 		elseif s:test_num == 4 " NY
 			echo "NY"
+			return "NY"
 		endif
 
 	elseif a:print_type == 3 " short messsage
 		if s:test_num == 1 " NG
 			echo s:test_ac_num."/".s:test_set_num
+			return s:test_ac_num."/".s:test_set_num
 		elseif s:test_num == 2 " OK
 			echo s:test_ac_num."/".s:test_set_num
+			return s:test_ac_num."/".s:test_set_num
 		elseif s:test_num == 3 " ND
 			echo "not downloaded
+			return "not downloaded
 		elseif s:test_num == 4 " NY
 			echo "not yet"
+			return "not yet"
 		endif
 
 	elseif a:print_type == 4 " full
@@ -301,11 +315,11 @@ function! s:print_data_test(print_type)
 endfunction
 
 function! gpp_compile#check_test_num()
-	call s:print_data_test(1)
+	return s:print_data_test(1)
 endfunction
 
 function! gpp_compile#check_test()
-	call s:print_data_test(3)
+	return s:print_data_test(3)
 endfunction
 
 function! gpp_compile#test(print_type)
