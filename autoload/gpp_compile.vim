@@ -5,7 +5,7 @@ scriptencoding utf-8
 if exists('g:loaded_gpp_compile_autoload')
     finish
 endif
-" let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
+let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
 
 
 " ユーザー設定を一時退避
@@ -27,7 +27,7 @@ let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
 let s:gpp_compile_is_compiled = 4
-let s:test_num = 4
+let s:test_num = 3
 let s:test_out_puts = []
 let s:test_set_num = 0
 let s:test_ac_num = 0
@@ -162,8 +162,11 @@ endfunction
 function! s:get_sample_data_page()
 	let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
-	if len(split(l:atcoder_task_site_data,"Task Name")) == 0
-		finish
+	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
+		let s:test_num = 3
+		let s:gpp_test_auto_type = 0
+		echo "failed to find url"
+		return
 	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
 	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
@@ -174,23 +177,26 @@ function! s:get_sample_data_page()
 		" echo "match_num:\t".stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) )
 		if stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) ) == -1
 			echo "not match"
+			let s:gpp_test_auto_type = 0
 			continue
 		endif
 		echo "match"
 		let l:hoge = split(l:hoge,'</a>')[0]
 		let l:hoge = split(l:hoge,"'>")[0]
 		let l:ans = "https://atcoder.jp".l:hoge 
-		let l:hoge = l:ans
+		let l:hoge = l:ans."?lang=en"
 		echo l:hoge
 		return l:hoge
 	endfor
-	echo "failed to find url"
 	finish
 endfunction
 
 function! s:get_test_data()
 	echo "making files"
 	let l:atcoder_url = s:get_sample_data_page()
+	if l:atcoder_url == ""
+		return
+	endif
 	echo "downloading sample data from " . l:atcoder_url . "..."
 	let l:atcoder_site_data = system("curl -s " . l:atcoder_url )
 	" echo "hoge"
@@ -199,7 +205,7 @@ function! s:get_test_data()
 	let l:test_data_num = 1
 	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
 	if !isdirectory(l:test_dir) 
-			call mkdir(l:test_dir,"p")
+		call mkdir(l:test_dir,"p")
 	endif
 	for l:test_data in l:test_data_list
 		let l:tmp_data = split(l:test_data,"Sample Output ")
@@ -216,7 +222,7 @@ function! s:check_test_files()
 	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
 	let l:test_file_list = split(system("ls ".l:file_dir."test/sample_input".split(expand("%:p:r"),"/")[-1]."_* 2>/dev/null"),"\n")
 	if len(l:test_file_list) == 0
-		let s:test_num = 4 " not downloaded
+		let s:test_num = 3 " not downloaded
 	endif
 	return l:test_file_list
 endfunction
@@ -229,6 +235,9 @@ function! s:test_file()
 		let l:test_file_list = s:check_test_files()
 		if len(l:test_file_list) == 0
 			echo "failed to make sample testfiles."
+			let s:test_num = 3 " not downloaded
+			let s:gpp_test_auto_type = 0
+			return
 		endif
 	else
 		" echo l:test_file_list
@@ -262,9 +271,7 @@ function! s:do_test()
 		endif
 	else
 
-		if s:test_num == 4
-			call s:test_file()
-		elseif s:test_num == 3
+		if s:test_num == 4 || s:test_num == 3
 			call s:test_file()
 		endif
 	endif
@@ -284,8 +291,8 @@ function! s:print_data_test(print_type)
 			echo "OK"
 			return "OK"
 		elseif s:test_num == 3 " ND
-			echo "WA"  
-			return "WA"
+			echo "ND"  
+			return "ND"
 		elseif s:test_num == 4 " NY
 			echo "NY"
 			return "NY"
@@ -299,8 +306,8 @@ function! s:print_data_test(print_type)
 			echo s:test_ac_num."/".s:test_set_num
 			return s:test_ac_num."/".s:test_set_num
 		elseif s:test_num == 3 " ND
-			echo "not downloaded
-			return "not downloaded
+			echo "not downloaded"
+			return "not downloaded"
 		elseif s:test_num == 4 " NY
 			echo "not yet"
 			return "not yet"
@@ -314,7 +321,7 @@ function! s:print_data_test(print_type)
 		elseif s:test_num == 2 " OK
 			echo s:test_ac_num."/".s:test_set_num." OK!"
 		elseif s:test_num == 3 " ND
-			echo "not downloaded
+			echo "not downloaded"
 		elseif s:test_num == 4 " NY
 			echo "not yet"
 		endif
