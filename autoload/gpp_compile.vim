@@ -162,6 +162,9 @@ endfunction
 function! s:get_sample_data_page()
 	let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
+	if len(split(l:atcoder_task_site_data,"Task Name")) == 0
+		finish
+	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
 	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
 	for l:hoge in l:atcoder_task_site_data_list
