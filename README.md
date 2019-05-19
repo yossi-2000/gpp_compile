@@ -31,6 +31,17 @@ gpp_compile#check_test_num()でtestの状況が(s:test_num )
 {ac}/{wa} or  null
 の形で数字が表示される。
 
+g:gpp_dir_type = 0
+自分の感じ
+/abc003/A.cpp
+/abc003/test/sample_(in|out)putA_1.txt
+とか
+
+g:gpp_dir_type = 1
+*/abc003/a/main.cpp
+*/abc003/a/sample-1.(in|out)
+
+
 printtype
 1 just num
 2 two char

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " Load this module only once.
 if exists('g:loaded_gpp_compile_autoload')
-    finish
+	finish
 endif
 let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
 
@@ -18,6 +18,7 @@ let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
 let s:gpp_compile_compiler_warning_option = get(g:, "gpp_compile_compiler_warning_option", "-Wall" )
 let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler_option", "" )
 
+let s:gpp_dir_type = get(g:,'gpp_dir_type',0)
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
 " auto test
@@ -46,7 +47,7 @@ function! s:copy()
 	let l:os = system("uname")
 	" echo l:os
 	if l:os == ""
-		echo "hoge"
+		echo "unknown os!"
 	endif
 	if l:os =~ "Darwin" 
 		" echo "mac"
@@ -146,9 +147,9 @@ function! gpp_compile#gpp_compile_reset()
 	let s:gpp_compile_is_compiled = 4
 	if s:gpp_compile_auto_type == 1
 		silent if s:is_target_dir() == 1
-			silent call s:do_compile()
-		endif
+		silent call s:do_compile()
 	endif
+endif
 endfunction
 
 function! gpp_compile#check_compile_num()
@@ -160,7 +161,14 @@ function! gpp_compile#check_compile()
 endfunction
 
 function! s:get_sample_data_page()
-	let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
+	if s:gpp_dir_type == 0
+		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
+	elseif s:gpp_dir_type ==1
+		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-3] . "/tasks?lang=en"
+	else 
+		echo "invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!"
+	endif
+
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
 	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
 		let s:test_num = 3
@@ -175,7 +183,14 @@ function! s:get_sample_data_page()
 		" echo "hoge:\t".l:hoge
 		" echo "file_name:\t".toupper(split(expand("%:p:r"),"/")[-1])
 		" echo "match_num:\t".stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) )
-		if stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) ) == -1
+		let l:question_name = ""
+		if s:gpp_dir_type == 0
+			let l:question_name = toupper(split(expand("%:p:r"),"/")[-1])
+		elseif s:gpp_dir_type == 1
+			let l:question_name = toupper( split(expand("%:p"),"/")[-2] )
+		endif
+
+		if stridx(l:hoge, l:question_name) == -1
 			echo "not match"
 			let s:gpp_test_auto_type = 0
 			continue
@@ -203,7 +218,13 @@ function! s:get_test_data()
 	let l:test_data_list = split(l:atcoder_site_data,"Sample Input")[1:]
 
 	let l:test_data_num = 1
-	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+
+	if s:gpp_dir_type == 0
+		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+	elseif s:gpp_dir_type == 1
+		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
+	endif
+
 	if !isdirectory(l:test_dir) 
 		call mkdir(l:test_dir,"p")
 	endif
@@ -212,15 +233,30 @@ function! s:get_test_data()
 		let l:tmp_input = split(split(split(l:tmp_data[0],"<pre>")[1],"</pre>")[0],"\n")
 		let l:tmp_output = split(split(split(l:tmp_data[1],"<pre>")[1],"</pre>")[0],"\n")
 
-		call writefile(l:tmp_input, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_input".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
-		call writefile(l:tmp_output, "/".join(split(expand("%:p"),"/")[:-2],"/") . "/test/sample_output".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt")
+		if s:gpp_dir_type == 0
+			let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
+			let l:input_file_name = l:test_dir."/sample_input".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt"
+			let l:output_file_name = l:test_dir."/sample_output".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt"
+		elseif s:gpp_dir_type == 1
+			let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
+			let l:input_file_name = l:test_dir."/sample-".l:test_data_num.".in"
+			let l:output_file_name = l:test_dir."/sample-".l:test_data_num.".out"
+		endif
+
+		call writefile(l:tmp_input, l:input_file_name)
+		call writefile(l:tmp_output,l:output_file_name)
 		let l:test_data_num += 1
 	endfor
 endfunction
 
 function! s:check_test_files()
 	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
-	let l:test_file_list = split(system("ls ".l:file_dir."test/sample_input".split(expand("%:p:r"),"/")[-1]."_* 2>/dev/null"),"\n")
+		if s:gpp_dir_type == 0
+			let l:test_file_list = split(system("ls ".l:file_dir."test/sample_input".split(expand("%:p:r"),"/")[-1]."* 2>/dev/null"),"\n")
+		elseif s:gpp_dir_type == 1
+			let l:test_file_list = split(system("ls ".l:file_dir."test/sample-*.in 2>/dev/null"),"\n")
+		endif
+
 	if len(l:test_file_list) == 0
 		let s:test_num = 3 " not downloaded
 	endif
@@ -353,9 +389,9 @@ function! gpp_compile#gpp_test_reset()
 
 	if s:gpp_test_auto_type == 1
 		silent if s:is_target_dir() == 1
-			call s:do_test()
-		endif
+		call s:do_test()
 	endif
+endif
 endfunction
 
 function! gpp_compile#auto()
