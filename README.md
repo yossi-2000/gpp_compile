@@ -64,10 +64,19 @@ return error message
 ### ツールが動くディレクトリの指定
 let g:gpp_compile_work_dir = $HOME ."/kyopro"
 などとするとツールが動くディレクトリを決められます。
-こうすると~/kyopro/*のファイルで動きます
+こうすると~/kyopro/ * のファイルで動きます
 - 標準はkyopro
 :call gpp_compile#is_target_dir()
 で動くディレクトリーかわかります.
+
+### ディレクトリ構造の選択
+let g:gpp_dir_type = 0 (デフォルト)
+だと** * /abc003/A.cpp的な感じになって
+testは * /abc003/test/ * てきな感じになります
+
+let g:gpp_dir_type = 1
+だと * /abc003/a/main.cpp的な感じになって
+testは * /abc003/a/test/ * 的な感じになります。
 
 ### コンパイラの種類
 let g:gpp_compile_compiler="clang++"

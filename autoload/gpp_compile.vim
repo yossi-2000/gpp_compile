@@ -219,26 +219,21 @@ function! s:get_test_data()
 
 	let l:test_data_num = 1
 
-	if s:gpp_dir_type == 0
 		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
-	elseif s:gpp_dir_type == 1
-		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
-	endif
 
 	if !isdirectory(l:test_dir) 
 		call mkdir(l:test_dir,"p")
 	endif
 	for l:test_data in l:test_data_list
 		let l:tmp_data = split(l:test_data,"Sample Output ")
-		let l:tmp_input = split(split(split(l:tmp_data[0],"<pre>")[1],"</pre>")[0],"\n")
-		let l:tmp_output = split(split(split(l:tmp_data[1],"<pre>")[1],"</pre>")[0],"\n")
+		echo "hoge"
+		let l:tmp_input = split(split(split(l:tmp_data[0],'<pre\(\w\|\s\|"\)*>')[1],"</pre>")[0],"\n")
+		let l:tmp_output = split(split(split(l:tmp_data[1],'<pre\(\w\|\s\|"\)*>')[1],"</pre>")[0],"\n")
 
 		if s:gpp_dir_type == 0
-			let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
 			let l:input_file_name = l:test_dir."/sample_input".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt"
 			let l:output_file_name = l:test_dir."/sample_output".split(expand("%:p:r"),"/")[-1] ."_".l:test_data_num.".txt"
 		elseif s:gpp_dir_type == 1
-			let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/")
 			let l:input_file_name = l:test_dir."/sample-".l:test_data_num.".in"
 			let l:output_file_name = l:test_dir."/sample-".l:test_data_num.".out"
 		endif
