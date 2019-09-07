@@ -17,6 +17,7 @@ set cpo&vim
 let s:gpp_compile_compiler = get(g:, "gpp_compile_compiler", "g++" )
 let s:gpp_compile_compiler_warning_option = get(g:, "gpp_compile_compiler_warning_option", "-Wall" )
 let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler_option", "" )
+let s:gpp_timeout = get(g:,"gpp_timeout","10")
 
 let s:gpp_dir_type = get(g:,'gpp_dir_type',0)
 " auto compile
@@ -75,7 +76,7 @@ function! gpp_compile#is_target_dir()
 endfunction
 
 function! s:compile_file()
-	return system(s:gpp_compile_compiler." ".s:gpp_compile_compiler_option." ".s:gpp_compile_compiler_warning_option." ".expand("%:p")." -o ".expand("%:p:r").".out" )
+	return system("timeout ".s:gpp_timeout." ".s:gpp_compile_compiler." ".s:gpp_compile_compiler_option." ".s:gpp_compile_compiler_warning_option." ".expand("%:p")." -o ".expand("%:p:r").".out" )
 endfunction
 
 function! s:compile_file_nowarn()

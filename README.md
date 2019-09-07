@@ -93,6 +93,10 @@ let g:gpp_compile_compiler_option = "-std=c++1z"
 let g:gpp_compile_auto_type = 0
 とすると自動コンパイルしなくなる.
 - なおデフォルトは1で自動コンパイルする。
+### timeout
+let g:gpp_timeout = "4"
+とかにすると4sでtimeoutする
+標準は10s
 
 ### 自動テスト
 let g:gpp_test_auto_type = 0
