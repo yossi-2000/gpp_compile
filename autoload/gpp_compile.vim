@@ -35,45 +35,11 @@ let s:test_set_num = 0
 let s:test_ac_num = 0
 
 function! s:check(check_command)
-	if !executable(a:check_command)
-		echohl WaringMsg | echo a:check_command . " is not defined!" | echohl None | finish
-	endif
+	silent return gpp_compile#check(check_command)
 endfunction
 
 call s:check(s:gpp_compile_compiler)
 call s:check("diff")
-
-function! s:copy()
-	call s:check("uname")
-	let l:os = system("uname")
-	" echo l:os
-	if l:os == ""
-		echo "unknown os!"
-	endif
-	if l:os =~ "Darwin" 
-		" echo "mac"
-		call s:check("pbcopy")
-		call system("cat ".expand("%:p")." | pbcopy ")
-	elseif l:os =~ "Linux"
-		" echo "Linux"
-		call s:check("xsel")
-		call system("cat ".expand("%:p")." | xsel --clipboard --input")
-	endif
-endfunction
-
-function! gpp_compile#copy()
-	call s:copy()
-endfunction
-
-
-function! s:is_target_dir()
-	echo ( expand("%:p") =~ s:gpp_compile_work_dir )
-	return expand("%:p") =~ s:gpp_compile_work_dir 
-endfunction
-
-function! gpp_compile#is_target_dir()
-	silent return s:is_target_dir()
-endfunction
 
 function! s:compile_file()
 	return system("timeout ".s:gpp_timeout." ".s:gpp_compile_compiler." ".s:gpp_compile_compiler_option." ".s:gpp_compile_compiler_warning_option." ".expand("%:p")." -o ".expand("%:p:r").".out" )

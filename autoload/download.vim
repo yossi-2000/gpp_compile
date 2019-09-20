@@ -1,6 +1,5 @@
 scriptencoding utf-8
 
-
 " Load this module only once.
 if exists('g:loaded_gpp_compile_autoload_downlload')
 	finish
