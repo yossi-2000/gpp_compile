@@ -281,7 +281,7 @@ function! s:test_file()
 		if ! filereadable(substitute(l:input_file,"in","out","g"))
 			call s:get_test_data()
 		endif
-		let l:diff_str = system(expand("%:p:r").".out < ".l:input_file." | diff -u --strip-trailing-cr - ".substitute(l:input_file,"in","out","g"))
+		let l:diff_str = system("timeout ".l:gpp_timeout." ".expand("%:p:r").".out < ".l:input_file." | diff -u --strip-trailing-cr - ".substitute(l:input_file,"in","out","g"))
 		if l:diff_str != ""
 			call add(s:test_out_puts,l:diff_str)
 		else
