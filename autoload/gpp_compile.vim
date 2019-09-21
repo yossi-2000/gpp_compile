@@ -261,7 +261,9 @@ endfunction
 
 function! s:test_file()
 	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
+						:w
 	let l:test_file_list = s:check_test_files()
+						:w
 	if len(l:test_file_list) == 0
 		call s:get_test_data()	
 		let l:test_file_list = s:check_test_files()
@@ -281,7 +283,7 @@ function! s:test_file()
 		if ! filereadable(substitute(l:input_file,"in","out","g"))
 			call s:get_test_data()
 		endif
-		let l:diff_str = system("timeout ".l:gpp_timeout." ".expand("%:p:r").".out < ".l:input_file." | diff -u --strip-trailing-cr - ".substitute(l:input_file,"in","out","g"))
+		let l:diff_str = system("timeout ".s:gpp_timeout." ".expand("%:p:r").".out < ".l:input_file." | diff -u --strip-trailing-cr - ".substitute(l:input_file,"in","out","g"))
 		if l:diff_str != ""
 			call add(s:test_out_puts,l:diff_str)
 		else
