@@ -19,11 +19,8 @@ let s:gpp_compile_compiler_warning_option = get(g:, "gpp_compile_compiler_warnin
 let s:gpp_compile_compiler_option = get(g:, "gpp_compile_compiler_option", "" )
 let s:gpp_timeout = get(g:,"gpp_timeout","10")
 
-let s:gpp_dir_type = get(g:,'gpp_dir_type',0)
 " auto compile
 let s:gpp_compile_auto_type = get(g:,'gpp_compile_auto_type','1')
-" auto test
-let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
 
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
