@@ -44,7 +44,7 @@ function! s:error(short_msg,msg)
 		call mkdir(l:test_dir,"p")
 	endif
 	call writefile([a:short_msg,a:msg],l:test_dir."/error.log")
-	echo "Please read error.log"
+	s:echo_error(a:short_msg."\n"."Please read error.log")
 endfunction
 
 function! s:check(check_command)
