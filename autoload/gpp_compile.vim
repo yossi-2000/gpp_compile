@@ -28,6 +28,8 @@ let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
+let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+
 let s:gpp_compile_is_compiled = 4
 let s:test_num = 3
 let s:test_out_puts = []
@@ -221,9 +223,7 @@ function! s:get_test_data()
 	let l:test_data_list = split(l:atcoder_site_data,"Sample Input")[1:]
 
 	let l:test_data_num = 1
-
-		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
-
+	
 	if !isdirectory(l:test_dir) 
 		call mkdir(l:test_dir,"p")
 	endif
