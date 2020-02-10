@@ -1,6 +1,5 @@
 scriptencoding utf-8
 
-
 " Load this module only once.
 if exists('g:loaded_gpp_compile_autoload')
 	finish
@@ -28,18 +27,19 @@ let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
-let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
-
 let s:gpp_compile_is_compiled = 4
 let s:test_num = 3
 let s:test_out_puts = []
 let s:test_set_num = 0
 let s:test_ac_num = 0
 
-function! s:error(shor_msg,msg)
+function! s:error(short_msg,msg)
 	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
-	echo a:shor_msg
-	call writefile(a:shor_msg."\n".a:msg, l:test_dir."/error.log")
+	if !isdirectory(l:test_dir) 
+		call mkdir(l:test_dir,"p")
+	endif
+	call writefile([a:short_msg,a:msg],l:test_dir."/error.log")
+	echo "Please read error.log"
 endfunction
 
 function! s:check(check_command)
@@ -175,15 +175,16 @@ function! s:get_sample_data_page()
 	elseif s:gpp_dir_type ==1
 		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-3] . "/tasks?lang=en"
 	else 
-		s:error("invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!")
+		call s:error("invalid g:gpp_dir_type ".s:gpp_dir_type." is invalid"," ")
+		return 
 	endif
 
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
 	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
 		let s:test_num = 3
 		let s:gpp_test_auto_type = 0
-		s:error("failed to find url",l:atcoder_task_site_data)
-		return
+		call s:error("failed to find url from ".l:atcoder_task_url,l:atcoder_task_site_data)
+		return 
 	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
 	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
@@ -269,9 +270,7 @@ endfunction
 
 function! s:test_file()
 	let l:file_dir = "/".join(split(expand("%:p"),"/")[:-2],"/") . "/"
-						:w
 	let l:test_file_list = s:check_test_files()
-						:w
 	if len(l:test_file_list) == 0
 		call s:get_test_data()	
 		let l:test_file_list = s:check_test_files()
@@ -315,7 +314,6 @@ function! s:do_test()
 			let s:test_ac_num = 0
 		endif
 	else
-
 		if s:test_num == 4 || s:test_num == 3
 			call s:test_file()
 		endif
