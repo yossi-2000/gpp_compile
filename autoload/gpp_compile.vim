@@ -177,18 +177,13 @@ endfunction
 function! s:get_sample_data_page()
 	if s:gpp_dir_type == 0
 		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-2] . "/tasks?lang=en"
-	elseif s:gpp_dir_type ==1
+	elseif s:gpp_dir_type == 1
 		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-3] . "/tasks?lang=en"
 	else 
 		call s:error("invalid g:gpp_dir_type ".s:gpp_dir_type." is invalid"," ")
 		return 
 	endif
 
-	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
-		let s:test_num = 3
-		let s:gpp_test_auto_type = 0
-		call s:error("failed to find url from ".l:atcoder_task_url,l:atcoder_task_site_data)
-		return 
 	let l:atcoder_task_site_data = system("curl -is " . l:atcoder_task_url )
 	let l:responce_code = matchstr(l:atcoder_task_site_data,'\%(HTTP/\d\s*\)\@<=\d\d\d')
 
@@ -196,34 +191,13 @@ function! s:get_sample_data_page()
 	if l:responce_code != "200"
 		call s:error("try to access to ".l:atcoder_task_url." but the status code is ".l:responce_code,l:atcoder_task_site_data)
 	endif
-	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
-	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
-	for l:hoge in l:atcoder_task_site_data_list
-		let l:hoge = split(l:hoge,"><a href='")[1]
-		" echo "hoge:\t".l:hoge
-		" echo "file_name:\t".toupper(split(expand("%:p:r"),"/")[-1])
-		" echo "match_num:\t".stridx(l:hoge,toupper(split(expand("%:p:r"),"/")[-1]) )
-		let l:question_name = ""
-		if s:gpp_dir_type == 0
-			let l:question_name = toupper(split(expand("%:p:r"),"/")[-1])
-		elseif s:gpp_dir_type == 1
-			let l:question_name = toupper( split(expand("%:p"),"/")[-2] )
-		endif
 
-		if stridx(l:hoge, l:question_name) == -1
-			echo "not match"
-			let s:gpp_test_auto_type = 0
-			continue
-		endif
-		echo "match"
-		let l:hoge = split(l:hoge,'</a>')[0]
-		let l:hoge = split(l:hoge,"'>")[0]
-		let l:ans = "https://atcoder.jp".l:hoge 
-		let l:hoge = l:ans."?lang=en"
-		echo l:hoge
-		return l:hoge
-	endfor
-	finish
+	let l:question_name = toupper(split(expand("%:p:r"),"/")[-1-s:gpp_dir_type])
+	let l:question_url = matchstr(l:atcoder_task_site_data,'\(<td class="text-center no-break"><a href="\)\@<=/\w*/\w*/\w*/\w*\(">'.l:question_name.'\)\@=')
+	if l:question_url == "" || len(l:question_url) == 0
+		call s:error("The url ".l:atcoder_task_url." does not contain information about the task page.",l:atcoder_task_site_data)
+	endif
+	return "https://atcoder.jp".l:question_url. "?lang=en"
 endfunction
 
 function! s:get_test_data()
