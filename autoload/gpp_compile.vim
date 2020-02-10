@@ -184,12 +184,17 @@ function! s:get_sample_data_page()
 		return 
 	endif
 
-	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
 	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
 		let s:test_num = 3
 		let s:gpp_test_auto_type = 0
 		call s:error("failed to find url from ".l:atcoder_task_url,l:atcoder_task_site_data)
 		return 
+	let l:atcoder_task_site_data = system("curl -is " . l:atcoder_task_url )
+	let l:responce_code = matchstr(l:atcoder_task_site_data,'\%(HTTP/\d\s*\)\@<=\d\d\d')
+
+	" check status code
+	if l:responce_code != "200"
+		call s:error("try to access to ".l:atcoder_task_url." but the status code is ".l:responce_code,l:atcoder_task_site_data)
 	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
 	let l:atcoder_task_site_data_list = split(l:atcoder_task_site_data,"text-center no-break")[1:]
