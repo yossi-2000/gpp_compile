@@ -28,11 +28,19 @@ let s:gpp_test_auto_type = get(g:,'gpp_test_auto_type','1')
 " work dir
 let s:gpp_compile_work_dir = get(g:,'gpp_compile_work_dir',$HOME . "/" ."kyopro")
 
+let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+
 let s:gpp_compile_is_compiled = 4
 let s:test_num = 3
 let s:test_out_puts = []
 let s:test_set_num = 0
 let s:test_ac_num = 0
+
+function! s:error(shor_msg,msg)
+	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+	echo a:shor_msg
+	call writefile(a:shor_msg."\n".a:msg, l:test_dir."/error.log")
+endfunction
 
 function! s:check(check_command)
 	if !executable(a:check_command)
@@ -131,7 +139,7 @@ function! s:print_data_compile(print_type)
 			echo "OK!"
 		elseif s:gpp_compile_is_compiled == 3 " WA
 			echo s:cout_string
-		elseif s:gpp_compile_is_compiled == 4 "NY
+		elseif s:gpp_compile_is_compiled == 4 " NY
 			echo "Not Yet!"
 		endif
 	else 
@@ -167,14 +175,14 @@ function! s:get_sample_data_page()
 	elseif s:gpp_dir_type ==1
 		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-3] . "/tasks?lang=en"
 	else 
-		echo "invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!"
+		s:error("invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!")
 	endif
 
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
 	if len(split(l:atcoder_task_site_data,"Task Name")) == 1
 		let s:test_num = 3
 		let s:gpp_test_auto_type = 0
-		echo "failed to find url"
+		s:error("failed to find url",l:atcoder_task_site_data)
 		return
 	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
@@ -220,7 +228,7 @@ function! s:get_test_data()
 
 	let l:test_data_num = 1
 
-		let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
+	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
 
 	if !isdirectory(l:test_dir) 
 		call mkdir(l:test_dir,"p")
