@@ -44,12 +44,12 @@ function! s:error(short_msg,msg)
 		call mkdir(l:test_dir,"p")
 	endif
 	call writefile([a:short_msg,a:msg],l:test_dir."/error.log")
-	s:echo_error(a:short_msg."\n"."Please read error.log")
+	call s:echo_error(a:short_msg."\n"."Please read error.log")
 endfunction
 
 function! s:check(check_command)
 	if !executable(a:check_command)
-		s:echo_error(a:check_command." is not defined!")
+		call s:echo_error(a:check_command." is not defined!")
 	endif
 endfunction
 
