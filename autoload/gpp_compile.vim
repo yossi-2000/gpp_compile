@@ -5,7 +5,8 @@ if exists('g:loaded_gpp_compile_autoload')
 	finish
 endif
 let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
-
+echo "hoge".type("hoge")
+echo "nyan".type(["nyan","wan"])
 
 " ユーザー設定を一時退避
 let s:save_cpo = &cpo
@@ -33,6 +34,10 @@ let s:test_out_puts = []
 let s:test_set_num = 0
 let s:test_ac_num = 0
 
+function! s:echo_error(msg)
+	echohl WaringMsg | echo a:msg | echohl None | finish
+endfunction
+
 function! s:error(short_msg,msg)
 	let l:test_dir = "/" . join(split(expand("%:p"),"/","g")[:-2],"/") ."/test"
 	if !isdirectory(l:test_dir) 
@@ -44,7 +49,7 @@ endfunction
 
 function! s:check(check_command)
 	if !executable(a:check_command)
-		echohl WaringMsg | echo a:check_command . " is not defined!" | echohl None | finish
+		s:echo_error(a:check_command." is not defined!")
 	endif
 endfunction
 
