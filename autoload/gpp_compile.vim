@@ -168,6 +168,7 @@ function! s:get_sample_data_page()
 		let l:atcoder_task_url = "https://atcoder.jp/contests/" . split(expand("%:p"),"/")[-3] . "/tasks?lang=en"
 	else 
 		echo "invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!"
+		call writefile("invalid g:gpp_dir_type \n".s:gpp_dir_type." is not invalid!", l:test_dir."/error.log"
 	endif
 
 	let l:atcoder_task_site_data = system("curl -s " . l:atcoder_task_url )
@@ -175,6 +176,7 @@ function! s:get_sample_data_page()
 		let s:test_num = 3
 		let s:gpp_test_auto_type = 0
 		echo "failed to find url"
+		call writefile("failed to findurl \n".l:atcoder_task_site_data, l:test_dir."/error.log")
 		return
 	endif
 	let l:atcoder_task_site_data = split(l:atcoder_task_site_data,"Task Name")[1]
