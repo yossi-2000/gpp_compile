@@ -5,8 +5,6 @@ if exists('g:loaded_gpp_compile_autoload')
 	finish
 endif
 let g:loaded_gpp_compile_autoload = '0.0.0 2019-05-12'
-echo "hoge".type("hoge")
-echo "nyan".type(["nyan","wan"])
 
 " ユーザー設定を一時退避
 let s:save_cpo = &cpo
